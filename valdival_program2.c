@@ -75,34 +75,57 @@ int main(int argc, char** argv) {
     int year;
     char userLang[1000];
     int uInput;
+// Declaring second user input:
+    int uInput2;
 
 // Takeing user input until input asks to exit the program:
     while(1){
-    // Printing the start of program interactivity with news that the file has processed:
-        printf("Processed file %s and parsed data for %d movies\n\n", csvName, counter);
+    // Printing the start of program interactivity:
 
-        printf("1. Show movies released in the specified year\n");
-        printf("2. Show highest rated movie for each year\n");
-        printf("3. Show the title and year of release of all movies in a specific language\n");
-        printf("4. Exit from the program\n");
+        printf("1. Select file to process\n");
+        printf("2. Exit from the program\n");
 
-        printf("\nEnter a choice from 1 to 4: \n");
+        printf("\nEnter a choice of 1 or 2: \n");
 
     // Asking for user input:
         scanf("%d", &uInput);
     
     // Reacting to user input:
         if (uInput < 1){
-            printf("Please don't do that. The choices are 1 to 4 inclusive.\n");
+            printf("Please don't do that. The choices are 1 or 2.\n");
         }
-        if (uInput > 4){
-            printf("Please don't do that. The choices are 1 to 4 inclusive.\n");
+        if (uInput > 2){
+            printf("Please don't do that. The choices are 1 or 2.\n");
         }
+
         switch(uInput){
         ////
+
+        
             case 1:
-                printf("Enter the year for which you want to see movies: ");
-                scanf("%d", &year);
+                printf("Enter 1 to pick the largest file\n");
+                printf("Enter 2 to pick the smallest file\n");
+                printf("Enter 3 to specify the name of a file\n");
+                printf("Enter a choice from 1 to 3:\n");
+                scanf("%d", &uInput2);
+
+            // Reacting to user input:
+                if (uInput < 1){
+                    printf("Please don't do that. The choices are 1, 2, and 3.\n");
+                }
+                if (uInput > 3){
+                    printf("Please don't do that. The choices are 1, 2, and 3.\n");
+                }
+
+                switch(uInput2){
+                    case 1:
+
+                    case 2:
+
+                    case 3:
+                }
+
+
                 int flag = 0;
             // Looping to find a movie struct where year matches user requested year:
                 for(int i = 0; i < counter ;i++){
@@ -170,8 +193,12 @@ int main(int argc, char** argv) {
         ////
             case 4:
                 exit(0);
-        }
-    }
+
+        } // switch(uInput)
+
+    } // while(1)
+
     return 0;
-}
+    
+} // int main(int argc, char** argv)
 
