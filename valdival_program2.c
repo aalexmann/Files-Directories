@@ -23,16 +23,21 @@ struct movie
 };
 
 // Comparator function from exploration modified:
-int comparator(const void* p, const void* q){
-    if(((struct movie*)p)->year == ((struct movie*)q)->year){
-        return ((struct movie*)p)->year < ((struct movie*)q)->year;
-    }
+// int comparator(const void *p, const void *q){
+//     int l = ((struct movie *)p)->year;
+//     int r = ((struct movie *)q)->year; 
+//     return (l - r);
+// }
+int comparator(const void* a, const void* b){
+
+    if(((struct movie*)a)->year == ((struct movie*)b)->year)
+        return ((struct movie*)a)->rating < ((struct movie*)b)->rating;
+    else
+        return ((struct movie*)a)->year < ((struct movie*)b)->year;
 }
 
-int main(int argc, char** argv) {  
+int main(void) {  
 
-    int year;
-    char userLang[1000];
     int uInput;
     int uInput2;
 // Open the current directory (from the directories exploration)
@@ -43,7 +48,9 @@ int main(int argc, char** argv) {
     int i = 0;
     char entryName[256];
 // Declare counter for number of movies:
-    int counter = -1;
+    int counter;
+    counter = 0;
+
 
 // Takeing user input until input asks to exit the program:
     while(1){
@@ -95,16 +102,16 @@ int main(int argc, char** argv) {
                         while((aDir = readdir(currDir)) != NULL){
 
                             if(strncmp(PREFIX, aDir->d_name, strlen(PREFIX)) == 0){
-                        // Get meta-data for the current entry
-                            stat(aDir->d_name, &dirStat);  
-                            
-                        // Find the largest file in the current directory:
-                            if(i == 0 || dirStat.st_size > lastBytesSize){
-                                lastBytesSize = dirStat.st_size;
-                                memset(entryName, '\0', sizeof(entryName));
-                                strcpy(entryName, aDir->d_name);
-                                }
-                            i++;
+                            // Get meta-data for the current entry
+                                stat(aDir->d_name, &dirStat);  
+                                
+                            // Find the largest file in the current directory:
+                                if((i == 0 || dirStat.st_size > lastBytesSize) && (dirStat.st_mode)){
+                                    lastBytesSize = dirStat.st_size;
+                                    memset(entryName, '\0', sizeof(entryName));
+                                    strcpy(entryName, aDir->d_name);
+                                    }
+                                i++;
                             }
                         }
                     // Close the directory
@@ -118,14 +125,14 @@ int main(int argc, char** argv) {
                         FILE* csv = fopen(csvName, "r");
                     // initialize row:
                         char row[4096];
-
                     // Processing file line by line:
                         while(fgets(row, sizeof(row), csv)){
                             if (counter >= 1){ // Checks if this is not the first row of the file (titles row).
                                 char* hdr = strdup(row);
                                 char* toke = strtok(hdr, ",\n");
                                 int j = 1;
-
+                                
+                                
                                 // Processing each column from a single row (tapping out when the strtok_r returns a NULL operator):
                                 while (toke != NULL){ 
 
@@ -143,63 +150,75 @@ int main(int argc, char** argv) {
                                     };
                                     toke = strtok(NULL, ",\n");
                                     j++;
+                                    
                                 }
                                 free(hdr);
                             }
                             counter++;
                         }
-                    // Create ONID directory for movie year files:
-                        char rando = random();
-                        char madeDir[100];
-                        sprintf(madeDir, "./933966715.movies.%d",rando);
-                        char* newFilePath = madeDir;
-                    // Change name for printf later:
-                        sprintf(madeDir, "933966715.movies.%d",rando);
 
-                        int file_descriptor;
-                        file_descriptor = open(newFilePath, O_RDWR | O_CREAT, 0750);
-                        if (file_descriptor == -1){
-                            printf("open() failed on \"%s\"\n", newFilePath);
-                            perror("Error");
-                            exit(1);
-                        }
-                        else {
-                        // Print that the directory has been made:
-                            printf("Created directory with name %s\n", madeDir);
-                        }
-                    //Should I now close the file???????
-                        close(file_descriptor);
-                    // Looping through every movie in the csv and comparing each ordered year:
-                    // Sort the movies by year:
-                        qsort(m, counter + 1, sizeof(m[0]), comparator);
-                        for(int i = 0; i < counter - 1; i++){
-                            if (i = 0 || m[i].year != m[i-1].year){
-                            // Create a file with year as name YYYY.txt
-	                            char newFile[100];
-                                sprintf(newFile, "./%s/%s.txt", madeDir,m[i].year);
-                                int fd;
-                                fd = open(newFile, O_RDWR | O_CREAT | O_APPEND, 0640);
-                            // Append m[i].name to the directory named m[i].year:
-                                char titl[50];
-                                sprintf(titl,"%s\n", m[i].title);
-                                int addTitl = write(fd, titl, strlen(titl));
-                                close(fd);
-                                }
-                            else if (m[i].year == m[i-1].year){
-                            // Open the file-directory named m[i].year.txt:
-                                char newFile[100];
-                                sprintf(newFile, "./%s/%s.txt", madeDir,m[i].year);
-                                int fd;
-                                fd = open(newFile, O_RDWR | O_APPEND, 0640);
-                            // Append m[i].name to the directory named m[i].year:
-                                char titl[50];
-                                sprintf(titl,"%s\n", m[i].title);
-                                int addTitl = write(fd, titl, strlen(titl));
-                                close(fd);
-                                }
+                    // Open the current directory before using mkdir():
+                        // fopen(currDir, "a"); I dont think we need to open the current directory...
+                    // Create ONID directory for movie year files:
+                        long int rando = 0;
+                        for (int i = 0; i < 2; i++){
+                            rando = random();
+                            if (0 > rando){
+                                i--;
+                            }
+                            if (99999 < rando){
+                                i--;
                             }
                         }
-
+                        char madeDir[256];
+                        sprintf(madeDir, "./933966715.movies.%ld",rando);
+                        char* newFilePath = madeDir;
+                        mkdir(newFilePath, 0750);
+                    // Change name for printf later:
+                        sprintf(madeDir, "933966715.movies.%ld",rando);
+                    // Print that the directory has been made:
+                        printf("Created directory with name %s\n", madeDir);
+                    // Close directory for later processing:
+                        // closedir(currDir); like the fopen above, i don tthink it ever needed to be opened...
+                    // Sort the movies by year:
+                        // qsort(m, counter + 1, sizeof(m[0]), comparator);
+                        
+                    // Looping through every movie in the csv and comparing each ordered year:
+                        for(int i = 0; i < counter - 1; i++){
+                            
+                            if (i == 0 || m[i].year != m[i-1].year){
+                                
+                            // Create a file with year as name YYYY.txt
+	                            char newFile[256];
+    // MAY NEED TO CHANGE LINE BELOW THIS: convert m[i].year into a string
+                                
+                                sprintf(newFile, "./%s/%d.txt", madeDir,m[i].year);
+                                
+                                int fd;
+                                fd = open(newFile, O_RDWR | O_CREAT | O_APPEND, 0640);
+                            // Append m[i].name to the file named m[i].year:
+                                char titl[256];
+                                sprintf(titl,"%s\n", m[i].title);
+                                
+                                write(fd, titl, strlen(titl));
+                                close(fd);
+                                
+                                }
+                            else {
+                            // Open the file-directory named m[i].year.txt:
+                                char nuevoFile[256];
+    // MAY NEED TO CHANGE LINE BELOW THIS: convert m2[i].year into a string
+                                sprintf(nuevoFile, "./%s/%d.txt", madeDir,m[i].year);
+                                int fp;
+                                fp = open(nuevoFile, O_RDWR | O_APPEND, 0640);
+                            // Append m[i].name to the directory named m[i].year:
+                                char titulo[50];
+                                sprintf(titulo,"%s\n", m[i].title);
+                                write(fp, titulo, strlen(titulo));
+                                close(fp);
+                                }
+                        }
+                        break;
 
                     case 2:
                     // Go through all the entries
@@ -209,8 +228,8 @@ int main(int argc, char** argv) {
                         // Get meta-data for the current entry
                             stat(aDir->d_name, &dirStat);  
                             
-                        // Find the largest file in the current directory:
-                            if(i == 0 || dirStat.st_size > lastBytesSize){
+                        // Find the smallest file in the current directory:
+                            if(i == 0 || dirStat.st_size < lastBytesSize){
                                 lastBytesSize = dirStat.st_size;
                                 memset(entryName, '\0', sizeof(entryName));
                                 strcpy(entryName, aDir->d_name);
@@ -222,18 +241,18 @@ int main(int argc, char** argv) {
                         closedir(currDir);
                         printf("Now processing the chosen file named %s\n", entryName);
                     // Initialize a movie structs:
-                        struct movie m[1000];
+                        struct movie m2[1000];
                     // Access name of file with char* argv[1], the string value of the file that points to the contents of the file:
-                        char* csvName = entryName;
+                        char* csvName2 = entryName;
                     // Read the file:
-                        FILE* csv = fopen(csvName, "r");
+                        FILE* csv2 = fopen(csvName2, "r");
                     // initialize row:
-                        char row[4096];
+                        char row2[4096];
 
                     // Processing file line by line:
-                        while(fgets(row, sizeof(row), csv)){
+                        while(fgets(row2, sizeof(row2), csv2)){
                             if (counter >= 1){ // Checks if this is not the first row of the file (titles row).
-                                char* hdr = strdup(row);
+                                char* hdr = strdup(row2);
                                 char* toke = strtok(hdr, ",\n");
                                 int j = 1;
 
@@ -241,16 +260,16 @@ int main(int argc, char** argv) {
                                 while (toke != NULL){ 
 
                                     if(j == 1){ 
-                                        strcpy(m[counter - 1].title, toke);
+                                        strcpy(m2[counter - 1].title, toke);
                                     };
                                     if(j == 2){
-                                        m[counter - 1].year = atoi(toke);
+                                        m2[counter - 1].year = atoi(toke);
                                     };
                                     if(j == 3){
-                                        strcpy(m[counter - 1].languages, toke);
+                                        strcpy(m2[counter - 1].languages, toke);
                                     };
                                     if(j == 4){
-                                        m[counter - 1].rating = atof(toke);
+                                        m2[counter - 1].rating = atof(toke);
                                     };
                                     toke = strtok(NULL, ",\n");
                                     j++;
@@ -260,126 +279,71 @@ int main(int argc, char** argv) {
                             counter++;
                         }
                     // Create ONID directory for movie year files:
-                        char rando = random();
-                        char madeDir[100];
-                        sprintf(madeDir, "./933966715.movies.%d",rando);
-                        char* newFilePath = madeDir;
+                        long int rando2 = 0;
+                        for (int i = 0; i < 2; i++){
+                            rando = random();
+                            if (0 > rando2){
+                                i--;
+                            }
+                        }
+                        char madeDir2[100];
+                        sprintf(madeDir2, "./933966715.movies.%ld",rando2);
+                        char* newFilePath2 = madeDir2;
                     // Change name for printf later:
-                        sprintf(madeDir, "933966715.movies.%d",rando);
+                        sprintf(madeDir2, "933966715.movies.%ld",rando2);
 
-                        int file_descriptor;
-                        file_descriptor = open(newFilePath, O_RDWR | O_CREAT, 0750);
-                        if (file_descriptor == -1){
-                            printf("open() failed on \"%s\"\n", newFilePath);
+                        int file_descriptor2;
+                        file_descriptor2 = open(newFilePath2, O_RDWR | O_CREAT, 0750);
+                        if (file_descriptor2 == -1){
+                            printf("open() failed on \"%s\"\n", newFilePath2);
                             perror("Error");
                             exit(1);
                         }
                         else {
                         // Print that the directory has been made:
-                            printf("Created directory with name %s\n", madeDir);
+                            printf("Created directory with name %s\n", madeDir2);
                         }
                     //Should I now close the file???????
-                        close(file_descriptor);
+                        close(file_descriptor2);
                     // Looping through every movie in the csv and comparing each ordered year:
                     // Sort the movies by year:
-                        qsort(m, counter + 1, sizeof(m[0]), comparator);
+                        qsort(m, counter + 1, sizeof(m2[0]), comparator);
                         for(int i = 0; i < counter - 1; i++){
-                            if (i = 0 || m[i].year != m[i-1].year){
+                            if (i == 0 || m2[i].year != m2[i-1].year){
                             // Create a file with year as name YYYY.txt
 	                            char newFile[100];
-                                sprintf(newFile, "./%s/%s.txt", madeDir,m[i].year);
+    // MAY NEED TO CHANGE LINE BELOW THIS: convert m2[i].year into a string
+                                sprintf(newFile, "./%s/%d.txt", madeDir2,m2[i].year);
                                 int fd;
                                 fd = open(newFile, O_RDWR | O_CREAT | O_APPEND, 0640);
-                            // Append m[i].name to the directory named m[i].year:
+                            // Append m2i].name to the directory named m2[i].year:
                                 char titl[50];
-                                sprintf(titl,"%s\n", m[i].title);
-                                int addTitl = write(fd, titl, strlen(titl));
+                                sprintf(titl,"%s\n", m2[i].title);
+                                write(fd, titl, strlen(titl));
                                 close(fd);
                                 }
-                            else if (m[i].year == m[i-1].year){
-                            // Open the file-directory named m[i].year.txt:
+                            else if (m2[i].year == m2[i-1].year){
+                            // Open the file-directory named m2[i].year.txt:
                                 char newFile[100];
-                                sprintf(newFile, "./%s/%s.txt", madeDir,m[i].year);
+    // MAY NEED TO CHANGE LINE BELOW THIS: convert m2[i].year into a string
+                                sprintf(newFile, "./%s/%d.txt", madeDir2,m2[i].year);
                                 int fd;
                                 fd = open(newFile, O_RDWR | O_APPEND, 0640);
-                            // Append m[i].name to the directory named m[i].year:
+                            // Append m2[i].name to the directory named m2[i].year:
                                 char titl[50];
-                                sprintf(titl,"%s\n", m[i].title);
-                                int addTitl = write(fd, titl, strlen(titl));
+                                sprintf(titl,"%s\n", m2[i].title);
+                                write(fd, titl, strlen(titl));
                                 close(fd);
                                 }
                             }
+                        break;
 
                     case 3:
-                }
+                        break;
 
+                } // switch(uInput2)
 
-                int flag = 0;
-            // Looping to find a movie struct where year matches user requested year:
-                for(int i = 0; i < counter ;i++){
-                    if(m[i].year == year){
-                        printf("%s\n", m[i].title);
-                        flag = 1; // Indicates that at least one movie of user requested year is in csv.
-                    }
-                }
-            // Printing a message for when no movies of that year are in the file:
-                if(flag == 0){
-                    printf("\nNo data about movies released in year %d\n\n", year);
-                }
-                break;
-        ////
-            case 2:    
-            // Looping through every year from 1800-2100:
-                for (int awardYear = 1800; awardYear < 2100; awardYear++){
-                    double highest = 0;
-                    int winner = -1;
-                // Looping through every movie in the csv and comparing it to current highest, if it is in the given year:
-                    for(int i = 0; i < counter - 1; i++){
-                        if (m[i].year == awardYear){
-                            if (highest == 0){
-                                highest = m[i].rating;
-                                winner = i;
-                            }
-                            else if (m[i].rating > highest){
-                                highest = m[i].rating;
-                                winner = i;
-                            }
-                        }
-                    }
-                // Printing the winner of each year if one exists:
-                    if(winner >= 0){
-                        printf("%d %.2f %s\n", m[winner].year, m[winner].rating, m[winner].title);
-                    }
-                }
-                break;
-        ////
-            case 3:
-                printf("Enter the language for which you want to see movies: ");
-                scanf("%s", userLang);
-                
-                int flagg = 0;
-                for(int i = 0; i < counter ;i++){
-                    
-                    char* mLangos = strdup(m[i].languages);
-                    char* lango = strtok(mLangos, "[];");
-                   
-
-                    while ( lango != NULL ){
-                        if(strcmp(lango, userLang) == 0){
-                            printf("%d %s\n",m[i].year, m[i].title);
-                            flagg = 1;
-                        }
-                        lango = strtok(NULL, "];");
-                        
-                    }
-                    
-                }
-            // Printing a message for when no movies are in that language:
-                if(flagg == 0)printf("No data about movies released in %s\n\n", userLang);
-                printf("\n");
-                break;
-        ////
-            case 4:
+            case 2:
                 exit(0);
 
         } // switch(uInput)
@@ -388,5 +352,5 @@ int main(int argc, char** argv) {
 
     return 0;
     
-} // int main(int argc, char** argv)
+ }// int main(int argc, char** argv)
 
