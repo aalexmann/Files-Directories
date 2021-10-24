@@ -34,6 +34,7 @@ int main(void) {
     int i = 0;
     char entryName[256];
     char entryName2[256];
+    char entryName3[256];
 // Declare counter for number of movies:
     int counter;
     counter = 0;
@@ -230,31 +231,31 @@ int main(void) {
                         // Processing file line by line:
                             while(fgets(row2, sizeof(row2), csv2)){
                                 if (counter >= 1){ // Checks if this is not the first row of the file (titles row).
-                                    char* hdr = strdup(row2);
-                                    char* toke = strtok(hdr, ",\n");
+                                    char* hdr2 = strdup(row2);
+                                    char* toke2 = strtok(hdr2, ",\n");
                                     int j = 1;
                                     
                                     
                                     // Processing each column from a single row (tapping out when the strtok_r returns a NULL operator):
-                                    while (toke != NULL){ 
+                                    while (toke2 != NULL){ 
 
                                         if(j == 1){ 
-                                            strcpy(m2[counter - 1].title, toke);
+                                            strcpy(m2[counter - 1].title, toke2);
                                         };
                                         if(j == 2){
-                                            m2[counter - 1].year = atoi(toke);
+                                            m2[counter - 1].year = atoi(toke2);
                                         };
                                         if(j == 3){
-                                            strcpy(m2[counter - 1].languages, toke);
+                                            strcpy(m2[counter - 1].languages, toke2);
                                         };
                                         if(j == 4){
-                                            m2[counter - 1].rating = atof(toke);
+                                            m2[counter - 1].rating = atof(toke2);
                                         };
-                                        toke = strtok(NULL, ",\n");
+                                        toke2 = strtok(NULL, ",\n");
                                         j++;
                                         
                                     }
-                                    free(hdr);
+                                    free(hdr2);
                                 }
                                 counter++;
                             }
@@ -284,34 +285,148 @@ int main(void) {
                                 if (i == 0 || m2[i].year != m2[i-1].year){
                                     
                                 // Create a file with year as name YYYY.txt
-                                    char newFile[256];                                
-                                    sprintf(newFile, "./%s/%d.txt", madeDir2,m2[i].year);
-                                    int fd;
-                                    fd = open(newFile, O_RDWR | O_CREAT | O_APPEND, 0640);
+                                    char newFile2[256];                                
+                                    sprintf(newFile2, "./%s/%d.txt", madeDir2,m2[i].year);
+                                    int fd2;
+                                    fd2 = open(newFile2, O_RDWR | O_CREAT | O_APPEND, 0640);
                                 // Append m2[i].name to the file named m2[i].year:
-                                    char titl[256];
-                                    sprintf(titl,"%s\n", m2[i].title);
+                                    char titl2[256];
+                                    sprintf(titl2,"%s\n", m2[i].title);
                                     
-                                    write(fd, titl, strlen(titl));
-                                    close(fd);
+                                    write(fd2, titl2, strlen(titl2));
+                                    close(fd2);
                                     
                                     }
                                 else {
                                 // Open the file-directory named m2[i].year.txt:
-                                    char nuevoFile[256];
-                                    sprintf(nuevoFile, "./%s/%d.txt", madeDir2,m2[i].year);
-                                    int fp;
-                                    fp = open(nuevoFile, O_RDWR | O_APPEND, 0640);
+                                    char nuevoFile2[256];
+                                    sprintf(nuevoFile2, "./%s/%d.txt", madeDir2,m2[i].year);
+                                    int fp2;
+                                    fp2 = open(nuevoFile2, O_RDWR | O_APPEND, 0640);
                                 // Append m2[i].name to the directory named m2[i].year:
-                                    char titulo[50];
-                                    sprintf(titulo,"%s\n", m2[i].title);
-                                    write(fp, titulo, strlen(titulo));
-                                    close(fp);
+                                    char titulo2[50];
+                                    sprintf(titulo2,"%s\n", m2[i].title);
+                                    write(fp2, titulo2, strlen(titulo2));
+                                    close(fp2);
                                     }
                             }
                             break;
 
                         case 3:
+                            printf("Enter the complete file name: ");
+                        // Asking for user input:
+                            char uInput3[100];
+                            scanf("%s", uInput3);
+                            // Go through all the entries
+                            while((aDir = readdir(currDir)) != NULL){
+
+                                if(strcmp(uInput3, aDir->d_name) == 0){
+                                // Get meta-data for the current entry
+                                    stat(aDir->d_name, &dirStat);
+                                    memset(entryName3, '\0', sizeof(entryName3));
+                                    strcpy(entryName3, aDir->d_name);
+                                }
+                            }
+                        // Close the directory
+                            closedir(currDir);
+                            if (strlen(entryName3) == 0){
+                                printf("\nThe file %s was not found. Try again\n", uInput3);
+                                break;
+                            }
+                            else{
+                                printf("\nNow processing the chosen file named %s", entryName3);
+                            }
+                            
+                        // Initialize a movie structs:
+                            struct movie m3[1000];
+                        // Access name of file with char* argv[1], the string value of the file that points to the contents of the file:
+                            char* csvName3 = entryName3;
+                        // Read the file:
+                            FILE* csv3 = fopen(csvName3, "r");
+                        // initialize row:
+                            char row3[4096];
+                        // Processing file line by line:
+                            while(fgets(row3, sizeof(row3), csv3)){
+                                if (counter >= 1){ // Checks if this is not the first row of the file (titles row).
+                                    char* hdr3 = strdup(row3);
+                                    char* toke3 = strtok(hdr3, ",\n");
+                                    int j = 1;
+                                    
+                                    
+                                    // Processing each column from a single row (tapping out when the strtok_r returns a NULL operator):
+                                    while (toke3 != NULL){ 
+
+                                        if(j == 1){ 
+                                            strcpy(m3[counter - 1].title, toke3);
+                                        };
+                                        if(j == 2){
+                                            m3[counter - 1].year = atoi(toke3);
+                                        };
+                                        if(j == 3){
+                                            strcpy(m3[counter - 1].languages, toke3);
+                                        };
+                                        if(j == 4){
+                                            m3[counter - 1].rating = atof(toke3);
+                                        };
+                                        toke3 = strtok(NULL, ",\n");
+                                        j++;
+                                        
+                                    }
+                                    free(hdr3);
+                                }
+                                counter++;
+                            }
+                        // Create ONID directory for movie year files:
+                            long int rando3 = 0;
+                            for (int i = 0; i < 2; i++){
+                                rando3 = random();
+                                if (0 > rando3){
+                                    i--;
+                                }
+                                if (99999 < rando3){
+                                    i--;
+                                }
+                            }
+                            char madeDir3[256];
+                            sprintf(madeDir3, "./933966715.movies.%ld",rando3);
+                            char* newFilePath3 = madeDir3;
+                            mkdir(newFilePath3, 0750);
+                        // Change name for printf later:
+                            sprintf(madeDir3, "933966715.movies.%ld",rando3);
+                        // Print that the directory has been made:
+                            printf("\nCreated directory with name %s\n", madeDir3);
+                        // Looping through every movie in the csv and comparing each ordered year:
+                            for(int i = 0; i < counter - 1; i++){
+                                
+                                if (i == 0 || m3[i].year != m3[i-1].year){
+                                    
+                                // Create a file with year as name YYYY.txt
+                                    char newFile3[256];                                
+                                    sprintf(newFile3, "./%s/%d.txt", madeDir3,m3[i].year);
+                                    int fd3;
+                                    fd3 = open(newFile3, O_RDWR | O_CREAT | O_APPEND, 0640);
+                                // Append m2[i].name to the file named m2[i].year:
+                                    char titl3[256];
+                                    sprintf(titl3,"%s\n", m3[i].title);
+                                    
+                                    write(fd3, titl3, strlen(titl3));
+                                    close(fd3);
+                                    
+                                    }
+                                else {
+                                // Open the file-directory named m2[i].year.txt:
+                                    char nuevoFile3[256];
+                                    sprintf(nuevoFile3, "./%s/%d.txt", madeDir3,m3[i].year);
+                                    int fp3;
+                                    fp3 = open(nuevoFile3, O_RDWR | O_APPEND, 0640);
+                                // Append m2[i].name to the directory named m2[i].year:
+                                    char titulo3[50];
+                                    sprintf(titulo3,"%s\n", m3[i].title);
+                                    write(fp3, titulo3, strlen(titulo3));
+                                    close(fp3);
+                                    }
+                            }
+
                             break;
 
                     } // switch(uInput2)
