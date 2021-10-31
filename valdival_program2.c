@@ -24,24 +24,26 @@ struct movie
 
 int main(void) {  
 
-    int uInput;
-    int uInput2;
-// Open the current directory (from the directories exploration)
-    DIR* currDir = opendir(".");
-    struct dirent *aDir;
-    off_t lastBytesSize;
-    struct stat dirStat;
-    int i = 0;
-    char entryName[256];
-    char entryName2[256];
-    char entryName3[256];
-// Declare counter for number of movies:
-    int counter;
-    counter = 0;
+
 
 
 // Takeing user input until input asks to exit the program:
     while(1){
+
+        int uInput;
+        int uInput2;
+    // Open the current directory (from the directories exploration)
+        DIR* currDir = opendir(".");
+        struct dirent *aDir;
+        off_t lastBytesSize;
+        struct stat dirStat;
+        char entryName[256];
+        char entryName2[256];
+        char entryName3[256];
+        char csvCheck[256];
+    // Declare counter for number of movies:
+        int counter;
+        counter = 0;
     // Printing the start of program interactivity:
 
         printf("1. Select file to process\n");
@@ -63,8 +65,9 @@ int main(void) {
         switch(uInput){
         ////
 
-        
+            
             case 1:
+            
                 while(1){
                     printf("Enter 1 to pick the largest file\n");
                     printf("Enter 2 to pick the smallest file\n");
@@ -92,10 +95,41 @@ int main(void) {
                             
                             while((aDir = readdir(currDir)) != NULL){
 
+
                                 if(strncmp(PREFIX, aDir->d_name, strlen(PREFIX)) == 0){
                                 // Get meta-data for the current entry
-                                    stat(aDir->d_name, &dirStat);  
-                                    
+                                    stat(aDir->d_name, &dirStat);
+
+                                // The next 28 lines make sure that the file ends in .csv
+                                    memset(csvCheck, '\0', sizeof(csvCheck));
+                                    strcpy(csvCheck, aDir->d_name);
+                                    int len = strlen(csvCheck) - 4;
+                                    char check[10];
+                                    char theCsv[10];
+                                    int i = 0;
+                                    while(i < 4){
+                                        check[i] = csvCheck[(len + i)];
+                                        i = i + 1;
+                                    }
+                                    theCsv[0] = '.';
+                                    theCsv[1] = 'c';
+                                    theCsv[2] = 's';
+                                    theCsv[3] = 'v';
+                                    int k = 0;
+                                    int decider = 0;
+                                    while(k < 4){
+                                        if (check[k] == theCsv[k]){
+                                            decider = 1;
+                                        }
+                                        else{
+                                            decider = 0;
+                                        }
+                                        k = k + 1;
+                                    }
+                                    if (decider != 1){
+                                        break;
+                                    }
+
                                 // Find the largest file in the current directory:
                                     if((i == 0 || dirStat.st_size > lastBytesSize) && (dirStat.st_mode)){
                                         lastBytesSize = dirStat.st_size;
@@ -207,6 +241,36 @@ int main(void) {
                                 if(strncmp(PREFIX, aDir->d_name, strlen(PREFIX)) == 0){
                                 // Get meta-data for the current entry
                                     stat(aDir->d_name, &dirStat);  
+
+                                // The next 28 lines make sure that the file ends in .csv
+                                    memset(csvCheck, '\0', sizeof(csvCheck));
+                                    strcpy(csvCheck, aDir->d_name);
+                                    int len = strlen(csvCheck) - 4;
+                                    char check[10];
+                                    char theCsv[10];
+                                    int i = 0;
+                                    while(i < 4){
+                                        check[i] = csvCheck[(len + i)];
+                                        i = i + 1;
+                                    }
+                                    theCsv[0] = '.';
+                                    theCsv[1] = 'c';
+                                    theCsv[2] = 's';
+                                    theCsv[3] = 'v';
+                                    int k = 0;
+                                    int decider = 0;
+                                    while(k < 4){
+                                        if (check[k] == theCsv[k]){
+                                            decider = 1;
+                                        }
+                                        else{
+                                            decider = 0;
+                                        }
+                                        k = k + 1;
+                                    }
+                                    if (decider != 1){
+                                        break;
+                                    }
                                     
                                 // Find the smallest file in the current directory:
                                     if((i == 0 || dirStat.st_size < lastBytesSize) && (dirStat.st_mode)){
@@ -311,12 +375,14 @@ int main(void) {
                                     }
                             }
                             break;
-
+                    ////
                         case 3:
                             printf("Enter the complete file name: ");
                         // Asking for user input:
                             char uInput3[100];
                             scanf("%s", uInput3);
+                            
+                            
                             // Go through all the entries
                             while((aDir = readdir(currDir)) != NULL){
 
@@ -327,14 +393,16 @@ int main(void) {
                                     strcpy(entryName3, aDir->d_name);
                                 }
                             }
+                            
                         // Close the directory
                             closedir(currDir);
-                            if (strlen(entryName3) == 0){
-                                printf("\nThe file %s was not found. Try again\n", uInput3);
-                                break;
+                            printf("You input the file name: %s", entryName3);
+                            if (strcmp(uInput3, entryName3) == 0){
+                                printf("\nNow processing the chosen file named %s", entryName3);
                             }
                             else{
-                                printf("\nNow processing the chosen file named %s", entryName3);
+                                printf("\nThe file %s was not found. Try again\n", uInput3);
+                                break;
                             }
                             
                         // Initialize a movie structs:
@@ -379,6 +447,7 @@ int main(void) {
                         // Create ONID directory for movie year files:
                             long int rando3 = 0;
                             for (int i = 0; i < 2; i++){
+                                rando3 = random();
                                 rando3 = random();
                                 if (0 > rando3){
                                     i--;
@@ -431,7 +500,12 @@ int main(void) {
 
                     } // switch(uInput2)
 
+                    
+                    break;
                 } // while(1) (the 2nd one)
+
+                
+                break;
             case 2:
                 exit(0);
 
